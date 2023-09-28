@@ -1,20 +1,25 @@
 version: '3'
 services:
   app:
-    #image: 
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: flask-docker-app
+    #build:
+    #  context: .
+    #  dockerfile: Dockerfile
     ports:
       - "5030:5030" 
     volumes:
-      - .:/app
+      - flask_telegram:/app
     environment:
       - PORT=5030
       - NODE_ENV=development
-    command: flask -A app run -h 0.0.0.0 -p 5030
+      - FLASK_APP=app.py
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+    command: flask -A app run -h 0.0.0.0 -p 5030  --reload --debug
     networks:
       - proxy_default
 networks:
   proxy_default:
     external: true
+volumes:
+  flask_telegram:
