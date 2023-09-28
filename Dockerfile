@@ -14,6 +14,7 @@ COPY . .
 #ENV FLASK_ENV=production
 ENV FLASK_ENV=development
 ENV FLASK_APP=app.py
+ENV DEBUG=1
 
 # Volume for code changes
 VOLUME /app
