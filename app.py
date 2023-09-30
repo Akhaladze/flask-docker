@@ -14,10 +14,10 @@ SQLALCHEMY_DATABASE_URI=os.getenv('SQLALCHEMY_DATABASE_URI')
 SQLALCHEMY_TRACK_MODIFICATIONS = os.getenv('SQLALCHEMY_TRACK_MODIFICATIONS')
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = SQLALCHEMY_TRACK_MODIFICATIONS
+#app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
+#app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = SQLALCHEMY_TRACK_MODIFICATIONS
 
-db = SQLAlchemy(app) 
+#db = SQLAlchemy(app) 
 
 
 
@@ -75,4 +75,4 @@ def webhook():
         return jsonify(request.json)
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0:5030')
+    app.run(debug=True, host='0.0.0.0:5020')
