@@ -1,0 +1,40 @@
+/system/device-mode/update container=yes
+
+/interface/veth/add name=veth2 address=172.19.0.2/24 gateway=172.19.0.1
+/interface/bridge/add name=msqt
+/ip/address/add address=172.19.0.1/24 interface=msqt
+/interface/bridge/port add bridge=msqt interface=veth2
+
+#rem /ip firewall nat add action=dst-nat chain=dstnat dst-address=192.168.88.1 dst-port=1883 protocol=tcp to-addresses=172.19.0.2 to-ports=1883
+/container mounts add src=/mosquitto_mounted dst=/mosquitto/config name=msqt_config
+
+/container/config/set registry-url=https://registry-1.docker.io tmpdir=pull
+
+/container/add remote-image=eclipse-mosquitto:latest interface=veth2 root-dir=mosquitto mounts=msqt_config logging=yes
+
+/container/start 0
+
+
+
+
+Add an MQTT broker:
+
+/iot/mqtt/brokers/add name=mosquitto username=test address=172.19.0.2
+Subscribe to the MQTT broker and the required topic:
+
+/iot/mqtt/subscribe broker=mosquitto topic=test/topic
+Publish a static MQTT message:
+
+/iot/mqtt/publish broker="mosquitto" topic="test/topic" message="{\"test\":\"123\"}"
+Check subscriptions for received messages:
+
+/iot/mqtt/subscriptions/recv/print
+ 0 broker=mosquitto topic="test/topic" data="{"test":"123"}"
+   time=2023-07-12 10:01:40
+You can also check the container logs (if enabled), to confirm the mosquitto is operational:
+
+12:47:28 container,info,debug 1675421248: New connection from 172.19.0.1:42240 on port 1883.
+12:47:28 container,info,debug 1675421248: New client connected from 172.19.0.1:42240 as MTD8580EC793C4 (p2, c1, k60, u'test').
+12:47:38 container,info,debug 1675421258: Client MTD8580EC793C4 disconnected.
+
+

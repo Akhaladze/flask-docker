@@ -14,10 +14,10 @@ SQLALCHEMY_DATABASE_URI=os.getenv('SQLALCHEMY_DATABASE_URI')
 SQLALCHEMY_TRACK_MODIFICATIONS = os.getenv('SQLALCHEMY_TRACK_MODIFICATIONS')
 
 app = Flask(__name__)
-#app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
-#app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = SQLALCHEMY_TRACK_MODIFICATIONS
+app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = SQLALCHEMY_TRACK_MODIFICATIONS
 
-#db = SQLAlchemy(app) 
+db = SQLAlchemy(app) 
 
 
 
@@ -68,11 +68,12 @@ def webhook():
                 reply_text = 'Use telegramm commands: /connectors, /about, /help to manage the bot.'
                 requests.post('https://api.telegram.org/bot' + token + '/sendMessage', data={'chat_id': chat_id, 'text': reply_text})
             
-            elif command != '/start' and command != '/connectors' and command != '/status' and command != '/about' and command != '/help':
+            if command != '/start' and command != '/connectors' and command != '/status' and command != '/about' and command != '/help':
                 reply_text = 'Unrecognized command...\n Use follow commands: /connectors, /status, /about, /help to manage the bot.'
                 requests.post('https://api.telegram.org/bot' + token + '/sendMessage', data={'chat_id': chat_id, 'text': reply_text})
+            else: False
         
         return jsonify(request.json)
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0:5020')
+    app.run(debug=True, host='0.0.0.0:5030')

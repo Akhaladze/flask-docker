@@ -1,0 +1,5 @@
+Home Assistant - Open source home automation gateway
+OpenHAB - Smart Home Gateway
+Node-RED - Flow-based programming for the Internet of Things
+zigbee2mqtt - A ZigBee to MQTT bridge
+Tasmota - ESP8266 firmware with MQTT support

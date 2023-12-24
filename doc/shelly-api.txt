@@ -1,0 +1,105 @@
+rabbitmq_mqtt,cowboy,rabbitmq_web_mqtt,rabbitmq_web_dispatch, amqp_client, rabbitmq_management_agent,accept,prometheus,rabbitmq_shovel
+#rabbitmq_web_stomp,rabbitmq_stomp
+#rabbitmq_web_stomp_examples
+
+
+===============================================================================
+
+https://shelly-api-docs.shelly.cloud/gen2/ComponentsAndServices/Ws
+===============================================================================
+
+export MQTT_SERVER=yourMQTTServer
+export MQTT_PORT=yourPort
+
+export SHELLY=yourShellyIPOrHostname
+
+
+http://10.100.1.46
+
+API
+curl http://10.100.1.46/shelly
+{"name":"gnet00-sw-01","id":"shellypro4pm-c8f09e87c674","mac":"C8F09E87C674","slot":1,"model":"SPSW-104PE16EU","gen":2,"fw_id":"20231219-133936/1.1.0-g34b5d4f","ver":"1.1.0","app":"Pro4PM","auth_en":fgnet@gnet-nuc:~$ 
+
+
+
+curl -X POST -d '{"id":1, "method":"Switch.GetStatus", "params":{"id":2}}' http://${SHELLY}/rpc
+curl -X POST -d '{"id":1, "method":"Switch.GetStatus", "params":{"id":2}}' http://10.100.1.46/rpc
+
+Shelly.GetConfig, Shelly.GetStatus and Shelly.GetDeviceInfo
+
+
+
+
+
+Webhook.Create 
+{"cid":0, "enable":true, "event":"temperature.change", "urls":["http://example.com"], "condition":"event.tC > 20"} 
+
+--------------------------------------------
+MQTT Status
+export SHELLY=10.33.55.152 # IP of your device
+
+curl -X POST -d '{"id":1, "method":"Mqtt.GetStatus"}' http://${SHELLY}/rpc
+curl -X POST -d '{"id":1, "method":"Mqtt.GetConfig"}' http://${SHELLY}/rpc
+curl -X POST -d '{"id":1, "method":"Mqtt.SetConfig", "params":{"config":{"enable":true, "server":"broker.hivemq.com:1883"}}}' http://${SHELLY}/rpc
+-----------------
+Reboot
+curl -X POST -d '{"id":1, "method":"Shelly.Reboot"}' http://${SHELLY}/rpc
+-----------------
+Voltmeter
+http://10.100.1.46/rpc/Voltmeter.SetConfig?id=0&config={"name":"Voltmeter0","report_thr":2.5,"xvoltage":{"expr":"x+1","unit":"m/s"}}
+
+curl -X POST -d '{"id":1, "method":"Voltmeter.GetStatus", "params":{"id":0}}'  http://10.100.1.46/rpc
+curl -X POST -d '{"id":1,"method":"PM1.GetStatus","params":{"id":0}}' http://10.100.1.46/rpc
+-----------------
+
+WS Config
+curl -X POST -d '{"id":1,"method":"Ws.GetConfig"}' http://${SHELLY}/rpc
+curl -X POST -d '{"id":1,"method":"Ws.GetStatus"}' http://${SHELLY}/rpc
+
+
+
+
+
+Now, open a terminal window and this time subscribe to the topic mynewtopic/rpc to be able to receive the response after the request is sent:
+
+Receive notifications over MQTT
+export MQTT_SERVER="broker.hivemq.com"
+export MQTT_PORT=1883
+export SHELLY_ID="shellypro4pm-f008d1d8b8b8" # The <shelly-id> of your device
+mosquitto_sub -h ${MQTT_SERVER} -p ${MQTT_PORT} -t ${SHELLY_ID}/events/rpc
+
+---------------
+Subscribe for messages on connecting and disconnecting over MQTT
+
+export MQTT_SERVER="broker.hivemq.com"
+export MQTT_PORT=1883
+export SHELLY_ID="shellypro4pm-f008d1d8b8b8" # The <shelly-id> of your device
+mosquitto_sub -h ${MQTT_SERVER} -p ${MQTT_PORT} -t ${SHELLY_ID}/online
+
+-------------------
+
+export MQTT_SERVER="broker.hivemq.com"
+export MQTT_PORT=1883
+export SHELLY_ID="shellypro4pm-f008d1d8b8b8" # The <shelly-id> of your device
+mosquitto_sub -h ${MQTT_SERVER} -p ${MQTT_PORT} -t mynewtopic/rpc
+
+
+==> Then, let's send the request. In a new terminal publish the following request on the topic <shelly-id>/rpc:
+
+export MQTT_SERVER="broker.hivemq.com"
+export MQTT_PORT=1883
+export SHELLY_ID="shellypro4pm-f008d1d8b8b8" # The <shelly-id> of your device
+mosquitto_pub -h ${MQTT_SERVER} -p ${MQTT_PORT} -t ${SHELLY_ID}/rpc \
+ -m '{"id":123, "src":"mynewtopic", "method":"Shelly.GetStatus"}'
+
+
+
+
+
+
+
+
+
+ Subscribe to events
+
+<shelly-id_>/events/rpc
