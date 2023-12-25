@@ -53,7 +53,15 @@ def commands():
 @app.route('/shelly')
 def shelly():
     getShellyStatuses.delay()
-    return redirect(url_for('devices'))
+    return 'Shelly statuses requested'
+
+@app.route('/test', methods=['GET'])
+def test():
+    if request.method == 'GET':
+        return render_template('test.html')
+    else:
+        return 'Nope'
+
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
