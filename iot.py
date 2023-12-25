@@ -1,79 +1,89 @@
 import sys, dotenv, os, requests, json
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify, render_template, redirect, url_for, flash, session
+from celery import Celery
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from db import db, Device, Event, Command
+from tasks.tasks import getShellyStatuses
 
 
 load_dotenv()
 token = os.getenv('AUTH_TOKEN')
+TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
+TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
+
 baseUrl = 'api.cloudpak.info'
 UpdatesUrl = 'https://api.telegram.org/bot' + token + '/getUpdates'
 
 SQLALCHEMY_DATABASE_URI=os.getenv('SQLALCHEMY_DATABASE_URI')
 SQLALCHEMY_TRACK_MODIFICATIONS = os.getenv('SQLALCHEMY_TRACK_MODIFICATIONS')
 
+
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = SQLALCHEMY_TRACK_MODIFICATIONS
+app.config['CELERY_BROKER_URL'] = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/0')
+app.config['CELERY_RESULT_BACKEND'] = os.getenv('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0')
 
-db = SQLAlchemy(app) 
 
+celery = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])
+celery.conf.update(app.config)
 
+db.init_app(app)
+migrate = Migrate(app, db)
 
 @app.route('/')
 def hello_world():
     return 'Hello, Docker!'
 
+@app.route('/devices')
+def devices():
+    devices = Device.query.all()
+    return render_template('devices.html', devices=devices)
+@app.route('/events')
+def events():
+    events = Event.query.all()
+    return render_template('events.html', events=events)
+@app.route('/commands')
+def commands():
+    commands = Command.query.all()
+    return render_template('commands.html', commands=commands)
+
+@app.route('/shelly')
+def shelly():
+    getShellyStatuses.delay()
+    return redirect(url_for('devices'))
+
 @app.route('/webhook', methods=['POST'])
 def webhook():
     if request.method == 'POST' and request.headers['content-type'] == 'application/json':
-        command = request.json['message']['text']
-        chat_id = request.json['message']['chat']['id']
-        type = request.json['message']['chat']['type']
-        
-        if type == 'private':
-            #first_name = request.json['message']['from']['first_name']
-            #last_name = request.json['message']['from']['last_name']
-            #username = request.json['message']['from']['username']
-            reply_text = 'Hello! I am SDS Scrapper Bot. Use follow commands: /connectors, /status, /about, /help to manage the bot. '
-            requests.post('https://api.telegram.org/bot' + token + '/sendMessage', data={'chat_id': chat_id, 'text': reply_text})          
-        
-            if command == '/start':
-                reply_text = 'Hello, I am SDS Scrapper Bot. Use follow commands: /connectors, /status, /about, /help to manage the bot. '
-                requests.post('https://api.telegram.org/bot' + token + '/sendMessage', data={'chat_id': chat_id, 'text': reply_text})
+            command = request.json['message']['text']
+            chat_id = request.json['message']['chat']['id']
+            type = request.json['message']['chat']['type']
+            
+            if type == 'private':
+                if command == '/status':
+                    # Get the connector statuses
+                    connector_statuses = requests.get('https://' + baseUrl + '/api/v1/swithcs/status', 
+                                                    headers={'Authorization': 'Bearer ' + token}).text
+                    
+                    # Send the statuses to the Telegram channel
+                    requests.post('https://api.telegram.org/bot' + TELEGRAM_BOT_TOKEN + '/sendMessage', 
+                                data={'chat_id': TELEGRAM_CHAT_ID, 'text': connector_statuses})
+                    
+                    return jsonify({"message": "Status sent to Telegram channel"}), 200
 
-            if command == '/connectors':
+                if command == '/command1':
+                    
+                    return jsonify({"message": "Test command"}), 200
+
                 
-                reply_text = 'Connectors: BASF, DOW, EVONIK, LANXESS, SOLVAY, WACKER, ALL'
-                #result = db.query.select('name').from_table('connectors').execute()
-                #result = db.session.execute('SELECT name FROM connectors')
-                #result_json = json.dumps(result)
-                #while result:  
-                #    result_json = json.dumps(result)
-                #    result = result.next()
-                #    print(result_json)
-                #reply_text = result_json
-                requests.post('https://api.telegram.org/bot' + token + '/sendMessage', data={'chat_id': chat_id, 'text': reply_text})
-            
-            if command == '/status':
-                reply_text = 'Statuses: OK, ERROR, WARNING...'
-                requests.post('https://api.telegram.org/bot' + token + '/sendMessage', data={'chat_id': chat_id, 'text': reply_text})
-                
-            if command == '/about':
-                reply_text = 'SDS Scrapper Bot v0.1'
-                requests.post('https://api.telegram.org/bot' + token + '/sendMessage', data={'chat_id': chat_id, 'text': reply_text}) 
-            
-            if command == '/help':
-                reply_text = 'Use telegramm commands: /connectors, /about, /help to manage the bot.'
-                requests.post('https://api.telegram.org/bot' + token + '/sendMessage', data={'chat_id': chat_id, 'text': reply_text})
-            
-            if command != '/start' and command != '/connectors' and command != '/status' and command != '/about' and command != '/help':
-                reply_text = 'Unrecognized command...\n Use follow commands: /connectors, /status, /about, /help to manage the bot.'
-                requests.post('https://api.telegram.org/bot' + token + '/sendMessage', data={'chat_id': chat_id, 'text': reply_text})
-            else: False
-        
-        return jsonify(request.json)
+                elif command == '/start':
+
+                    return jsonify({"message": "Welcome to the CloudPak IoT bot"}), 200
+
+            return jsonify(request.json)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0:5030')

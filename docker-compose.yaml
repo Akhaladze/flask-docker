@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    ports:
+    ports:  
       - "5030:5030" 
     volumes:
       - flask_telegram:/app
@@ -17,8 +17,10 @@ services:
     command: flask -A app run -h 0.0.0.0 -p 5030  --reload --debug
     networks:
       - iot
+
 networks:
   iot:
     external: true
 volumes:
   flask_telegram:
+  flask_core:

@@ -5,22 +5,23 @@ WORKDIR /app
 
 # Copy the requirements file and install the Python dependencies
 COPY requirements.txt .
+COPY . .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the source code to the working directory
-COPY . .
+
 
 # Set environment variables
 #ENV FLASK_ENV=production
-ENV FLASK_ENV=development
-ENV FLASK_APP=iot.py
-ENV DEBUG=1
+#ENV FLASK_ENV=development
+#ENV FLASK_APP=iot.py
+#ENV DEBUG=1
 
 # Volume for code changes
 VOLUME /app
 
 # Expose port
-EXPOSE 5030
+#EXPOSE 5030
 
 # Run Flask using WSGI server (gunicorn) with web configuration options
 #CMD ["gunicorn", "--workers=4", "--threads=2", "--bind=0.0.0.0:5353", "app:app"]
