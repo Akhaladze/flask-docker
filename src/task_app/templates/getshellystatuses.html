@@ -1,0 +1,60 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset=UTF-8>
+  <title>Celery Example</title>
+</head>
+<body>
+<h2>Celery Example</h2>
+Execute background tasks with Celery. Submits tasks and shows results using JavaScript.
+
+<hr>
+<h4>Add</h4>
+<p>Start a task to add two numbers, then poll for the result.
+<form id=add method=post action="{{ url_for("tasks.getShellyStatuses") }}">
+  <label>A <input type=number name=a value=4></label><br>
+  <label>B <input type=number name=b value=2></label><br>
+  <input type=submit>
+</form>
+<p>Result: <span id=add-result></span></p>
+
+<hr>
+
+
+<script>
+  const taskForm = (formName, doPoll, report) => {
+    document.forms[formName].addEventListener("submit", (event) => {
+      event.preventDefault()
+      fetch(event.target.action, {
+        method: "POST",
+        body: new FormData(event.target)
+      })
+        .then(response => response.json())
+        .then(data => {
+          report(null)
+
+          const poll = () => {
+            fetch(`/tasks/result/${data["result_id"]}`)
+              .then(response => response.json())
+              .then(data => {
+                report(data)
+
+                if (!data["ready"]) {
+                  setTimeout(poll, 500)
+                } else if (!data["successful"]) {
+                  console.error(formName, data)
+                }
+              })
+          }
+
+          if (doPoll) {
+            poll()
+          }
+        })
+    })
+  }
+
+
+</script>
+</body>
+</html>

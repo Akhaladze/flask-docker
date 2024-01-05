@@ -14,7 +14,7 @@ services:
       - FLASK_APP=iot.py
       - FLASK_ENV=development
       - FLASK_DEBUG=1
-    command: flask -A app run -h 0.0.0.0 -p 5030  --reload --debug
+    command: flask -A iot run -h 0.0.0.0 -p 5030  --reload --debug
     networks:
       - iot
 

@@ -1,7 +1,0 @@
-2023/12/24 23:41:49 [error] 256#256: *535 open() "/var/www/html/.env" failed (2: No such file or directory), client: 20.0.145.106, server: localhost-nginx-proxy-manager, request: "GET //.env HTTP/1.1", host: "146.0.80.189"
-2023/12/25 00:55:07 [warn] 278#278: 512 worker_connections are not enough, reusing connections
-2023/12/25 00:55:07 [alert] 278#278: 512 worker_connections are not enough
-2023/12/25 00:55:07 [error] 280#280: *1634 recv() failed (104: Connection reset by peer) while reading response header from upstream, client: 127.0.0.1, server: localhost-nginx-proxy-manager, request: "GET /favicon.ico HTTP/1.1", upstream: "http://127.0.0.1:80/favicon.ico", host: "146.0.80.189"
-2023/12/25 02:42:23 [warn] 324#324: 512 worker_connections are not enough, reusing connections
-2023/12/25 02:42:23 [alert] 324#324: *3061 512 worker_connections are not enough while connecting to upstream, client: 127.0.0.1, server: localhost-nginx-proxy-manager, request: "GET /favicon.ico HTTP/1.1", upstream: "http://127.0.0.1:80/favicon.ico", host: "146.0.80.189"
-2023/12/25 02:42:24 [error] 324#324: *3062 open() "/var/www/html/robots.txt" failed (2: No such file or directory), client: 183.136.225.42, server: localhost-nginx-proxy-manager, request: "GET /robots.txt HTTP/1.1", host: "146.0.80.189:80"

@@ -6,7 +6,7 @@ WORKDIR /app
 # Copy the requirements file and install the Python dependencies
 COPY requirements.txt .
 COPY . .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip3 install --no-cache-dir -r requirements.txt
 
 # Copy the source code to the working directory
 
@@ -26,3 +26,4 @@ VOLUME /app
 # Run Flask using WSGI server (gunicorn) with web configuration options
 #CMD ["gunicorn", "--workers=4", "--threads=2", "--bind=0.0.0.0:5353", "app:app"]
 #CMD ["flask -A app run -h 0.0.0.0 -p 5030"]
+#CMD ["python", "iot.py"]
